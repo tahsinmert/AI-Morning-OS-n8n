@@ -1,0 +1,23 @@
+AI Morning OS n8n Workflow Template - Commercial License
+
+Copyright (c) 2026 Tahsin Mert
+
+All rights reserved.
+
+This package is sold or provided as a commercial n8n workflow template. You may
+use, import, and modify the workflow for personal use or internal business
+automation.
+
+You may not resell, redistribute, publish, sublicense, share, or include this
+workflow template as part of another template, marketplace listing, repository,
+or downloadable package without prior written permission from the copyright
+holder.
+
+API keys, notification topics, RSS feeds, credentials, and third-party service
+accounts used with this package belong to the end user. The copyright holder is
+not responsible for third-party costs, outages, rate limits, account
+restrictions, billing issues, data handling, or production use of this template.
+
+This package is provided as a configurable automation template. Users are
+responsible for testing the workflow in their own n8n environment before
+production use.

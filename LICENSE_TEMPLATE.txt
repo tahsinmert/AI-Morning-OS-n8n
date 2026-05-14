@@ -1,0 +1,23 @@
+AI Morning OS n8n Workflow Template - Commercial License Template
+
+Seller:
+Buyer:
+Purchase date:
+Order ID:
+
+License terms:
+
+1. The buyer may import and use this workflow for personal use or internal business automation.
+2. The buyer may edit configuration values, prompts, schedules, and notification settings for their own use.
+3. The buyer may not resell, redistribute, publish, sublicense, or share the workflow JSON as a separate template unless the seller gives written permission.
+4. API keys, ntfy topics, RSS feeds, and third-party service accounts belong to the buyer.
+5. The seller is not responsible for third-party usage costs, rate limits, outages, account restrictions, or billing issues.
+6. This package is provided as a configurable automation template. The buyer is responsible for testing it in their own n8n environment before production use.
+7. The seller does not receive or store the buyer's API keys, ntfy topics, credentials, or execution data.
+
+Optional support terms:
+
+- Support period:
+- Support channel:
+- Included revisions:
+- Response time:

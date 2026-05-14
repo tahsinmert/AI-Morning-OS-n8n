@@ -1,0 +1,559 @@
+{
+  "name": "AI Morning OS - Premium Template",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Setup\n1. Open **USER CONFIG - EDIT ME**.\n2. Replace all placeholder values, especially the Groq API key and ntfy topic.\n3. Open **Schedule Trigger** and set the preferred run time.\n4. Run once manually before activation.\n\nBuilt for resale: config validation, retries, feed fallbacks, polished AI prompting, and no embedded credentials.",
+        "height": 300,
+        "width": 480,
+        "color": 5
+      },
+      "id": "sticky-setup-note",
+      "name": "README - SETUP",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -620,
+        -820
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 7,
+              "triggerAtMinute": 30
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -420,
+        -520
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cfg-user-name",
+              "name": "user_name",
+              "value": "Your Name",
+              "type": "string"
+            },
+            {
+              "id": "cfg-city-name",
+              "name": "city_name",
+              "value": "Your City",
+              "type": "string"
+            },
+            {
+              "id": "cfg-weather-latitude",
+              "name": "weather_latitude",
+              "value": "41.0082",
+              "type": "string"
+            },
+            {
+              "id": "cfg-weather-longitude",
+              "name": "weather_longitude",
+              "value": "28.9784",
+              "type": "string"
+            },
+            {
+              "id": "cfg-user-profile",
+              "name": "user_profile",
+              "value": "Product leader focused on AI tools, SaaS growth, and remote teams",
+              "type": "string"
+            },
+            {
+              "id": "cfg-output-language",
+              "name": "output_language",
+              "value": "English",
+              "type": "string"
+            },
+            {
+              "id": "cfg-tech-rss-url",
+              "name": "tech_rss_url",
+              "value": "https://techcrunch.com/feed/",
+              "type": "string"
+            },
+            {
+              "id": "cfg-jobs-rss-url",
+              "name": "jobs_rss_url",
+              "value": "https://weworkremotely.com/categories/remote-programming-jobs.rss",
+              "type": "string"
+            },
+            {
+              "id": "cfg-ntfy-topic",
+              "name": "ntfy_topic",
+              "value": "CHANGE_ME_UNIQUE_NTFY_TOPIC",
+              "type": "string"
+            },
+            {
+              "id": "cfg-ntfy-title",
+              "name": "ntfy_title",
+              "value": "AI Morning OS",
+              "type": "string"
+            },
+            {
+              "id": "cfg-ntfy-priority",
+              "name": "ntfy_priority",
+              "value": "default",
+              "type": "string"
+            },
+            {
+              "id": "cfg-ntfy-tags",
+              "name": "ntfy_tags",
+              "value": "sunrise,briefing,ai",
+              "type": "string"
+            },
+            {
+              "id": "cfg-groq-api-key",
+              "name": "groq_api_key",
+              "value": "PASTE_YOUR_GROQ_API_KEY_HERE",
+              "type": "string"
+            },
+            {
+              "id": "cfg-groq-model",
+              "name": "groq_model",
+              "value": "llama-3.3-70b-versatile",
+              "type": "string"
+            },
+            {
+              "id": "cfg-ai-temperature",
+              "name": "ai_temperature",
+              "value": "0.6",
+              "type": "string"
+            },
+            {
+              "id": "cfg-max-words",
+              "name": "max_words",
+              "value": "220",
+              "type": "string"
+            },
+            {
+              "id": "cfg-max-completion-tokens",
+              "name": "max_completion_tokens",
+              "value": "700",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "user-config",
+      "name": "USER CONFIG - EDIT ME",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -180,
+        -520
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first()?.json ?? {};\nconst get = (key, fallback = '') => String(input[key] ?? fallback).trim();\nconst errors = [];\n\nconst config = {\n  user_name: get('user_name'),\n  city_name: get('city_name'),\n  weather_latitude: get('weather_latitude'),\n  weather_longitude: get('weather_longitude'),\n  user_profile: get('user_profile'),\n  output_language: get('output_language', 'English'),\n  tech_rss_url: get('tech_rss_url'),\n  jobs_rss_url: get('jobs_rss_url'),\n  ntfy_topic: get('ntfy_topic'),\n  ntfy_title: get('ntfy_title', 'AI Morning OS'),\n  ntfy_priority: get('ntfy_priority', 'default').toLowerCase(),\n  ntfy_tags: get('ntfy_tags', 'sunrise,briefing,ai'),\n  groq_api_key: get('groq_api_key'),\n  groq_model: get('groq_model', 'llama-3.3-70b-versatile'),\n  ai_temperature: Number(get('ai_temperature', '0.6')),\n  max_words: Number.parseInt(get('max_words', '220'), 10),\n  max_completion_tokens: Number.parseInt(get('max_completion_tokens', '700'), 10),\n};\n\nconst required = [\n  'user_name',\n  'city_name',\n  'weather_latitude',\n  'weather_longitude',\n  'user_profile',\n  'output_language',\n  'tech_rss_url',\n  'jobs_rss_url',\n  'ntfy_topic',\n  'groq_api_key',\n  'groq_model',\n];\n\nfor (const key of required) {\n  if (!config[key]) errors.push(`${key} is required.`);\n}\n\nconst latitude = Number(config.weather_latitude);\nconst longitude = Number(config.weather_longitude);\nif (!Number.isFinite(latitude) || latitude < -90 || latitude > 90) {\n  errors.push('weather_latitude must be a number between -90 and 90.');\n}\nif (!Number.isFinite(longitude) || longitude < -180 || longitude > 180) {\n  errors.push('weather_longitude must be a number between -180 and 180.');\n}\n\nfor (const key of ['tech_rss_url', 'jobs_rss_url']) {\n  if (config[key] && !/^https?:\\/\\//i.test(config[key])) {\n    errors.push(`${key} must start with http:// or https://.`);\n  }\n}\n\nif (/CHANGE_ME|PASTE|YOUR_|TOPIC|API_KEY/i.test(config.ntfy_topic)) {\n  errors.push('ntfy_topic still contains a placeholder value.');\n}\nif (!/^[A-Za-z0-9][A-Za-z0-9_-]{5,63}$/.test(config.ntfy_topic || '')) {\n  errors.push('ntfy_topic must be 6-64 characters and use only letters, numbers, underscores, or hyphens.');\n}\nif (/PASTE|YOUR_|CHANGE_ME|GROQ_API_KEY/i.test(config.groq_api_key)) {\n  errors.push('groq_api_key still contains a placeholder value.');\n}\nif (config.groq_api_key && !/^gsk_[A-Za-z0-9_-]{10,}$/.test(config.groq_api_key)) {\n  errors.push('groq_api_key should look like a Groq API key starting with gsk_.');\n}\n\nif (!Number.isFinite(config.ai_temperature) || config.ai_temperature < 0 || config.ai_temperature > 2) {\n  errors.push('ai_temperature must be a number between 0 and 2.');\n}\nif (!Number.isFinite(config.max_words) || config.max_words < 80 || config.max_words > 600) {\n  errors.push('max_words must be a number between 80 and 600.');\n}\nif (!Number.isFinite(config.max_completion_tokens) || config.max_completion_tokens < 200 || config.max_completion_tokens > 4096) {\n  errors.push('max_completion_tokens must be a number between 200 and 4096.');\n}\n\nconst validPriorities = new Set(['min', 'low', 'default', 'high', 'urgent', '1', '2', '3', '4', '5']);\nif (!validPriorities.has(config.ntfy_priority)) {\n  errors.push('ntfy_priority must be min, low, default, high, urgent, or a value from 1 to 5.');\n}\n\nif (errors.length) {\n  throw new Error(`AI Morning OS configuration error:\\n- ${errors.join('\\n- ')}`);\n}\n\nreturn [{\n  json: {\n    ...config,\n    weather_latitude: latitude,\n    weather_longitude: longitude,\n    ai_temperature: config.ai_temperature,\n    max_words: config.max_words,\n    max_completion_tokens: config.max_completion_tokens,\n    config_status: 'valid',\n  },\n}];"
+      },
+      "id": "validate-config",
+      "name": "Validate Config",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        60,
+        -520
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.open-meteo.com/v1/forecast?latitude={{$json[\"weather_latitude\"]}}&longitude={{$json[\"weather_longitude\"]}}&current=temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,weather_code,wind_speed_10m&timezone=auto",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "fetch-weather",
+      "name": "Fetch Weather",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        300,
+        -520
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "continueOnFail": true,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const current = $json.current ?? {};\nconst code = Number(current.weather_code);\n\nconst weatherLabels = new Map([\n  [0, 'Clear sky'],\n  [1, 'Mainly clear'],\n  [2, 'Partly cloudy'],\n  [3, 'Overcast'],\n  [45, 'Fog'],\n  [48, 'Depositing rime fog'],\n  [51, 'Light drizzle'],\n  [53, 'Moderate drizzle'],\n  [55, 'Dense drizzle'],\n  [56, 'Light freezing drizzle'],\n  [57, 'Dense freezing drizzle'],\n  [61, 'Slight rain'],\n  [63, 'Moderate rain'],\n  [65, 'Heavy rain'],\n  [66, 'Light freezing rain'],\n  [67, 'Heavy freezing rain'],\n  [71, 'Slight snow'],\n  [73, 'Moderate snow'],\n  [75, 'Heavy snow'],\n  [77, 'Snow grains'],\n  [80, 'Slight rain showers'],\n  [81, 'Moderate rain showers'],\n  [82, 'Violent rain showers'],\n  [85, 'Slight snow showers'],\n  [86, 'Heavy snow showers'],\n  [95, 'Thunderstorm'],\n  [96, 'Thunderstorm with slight hail'],\n  [99, 'Thunderstorm with heavy hail'],\n]);\n\nconst asNumber = (value) => {\n  const number = Number(value);\n  return Number.isFinite(number) ? number : null;\n};\n\nconst temperature = asNumber(current.temperature_2m);\nconst apparent = asNumber(current.apparent_temperature);\nconst humidity = asNumber(current.relative_humidity_2m);\nconst precipitation = asNumber(current.precipitation);\nconst wind = asNumber(current.wind_speed_10m);\nconst condition = weatherLabels.get(code) ?? 'Weather data unavailable';\nconst weatherAvailable = !$json.error && temperature !== null;\n\nconst details = [];\nif (temperature !== null) details.push(`${temperature} C`);\nif (apparent !== null) details.push(`feels like ${apparent} C`);\nif (humidity !== null) details.push(`${humidity}% humidity`);\nif (precipitation !== null) details.push(`${precipitation} mm precipitation`);\nif (wind !== null) details.push(`${wind} km/h wind`);\n\nreturn [{\n  json: {\n    weather_available: weatherAvailable,\n    weather_code: Number.isFinite(code) ? code : null,\n    weather_condition: condition,\n    temperature_c: temperature,\n    apparent_temperature_c: apparent,\n    humidity_percent: humidity,\n    precipitation_mm: precipitation,\n    wind_speed_kmh: wind,\n    weather_summary: weatherAvailable ? `${condition}; ${details.join('; ')}` : 'Weather data unavailable from Open-Meteo for this run.',\n  },\n}];"
+      },
+      "id": "normalize-weather",
+      "name": "Normalize Weather",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        540,
+        -520
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "url": "={{ $node[\"Validate Config\"].json[\"tech_rss_url\"] }}",
+        "options": {}
+      },
+      "id": "read-tech-rss",
+      "name": "Read Tech RSS",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        780,
+        -640
+      ],
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000,
+      "continueOnFail": true,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "maxItems": 1
+      },
+      "id": "pick-top-tech-item",
+      "name": "Pick Top Tech Item",
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        1020,
+        -640
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "url": "={{ $node[\"Validate Config\"].json[\"jobs_rss_url\"] }}",
+        "options": {}
+      },
+      "id": "read-jobs-rss",
+      "name": "Read Jobs RSS",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        780,
+        -400
+      ],
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000,
+      "continueOnFail": true,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "maxItems": 1
+      },
+      "id": "pick-top-job-item",
+      "name": "Pick Top Job Item",
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        1020,
+        -400
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "id": "merge-briefing-inputs",
+      "name": "Merge Briefing Inputs",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1260,
+        -520
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const config = $items('Validate Config')[0]?.json ?? {};\nconst weather = $items('Normalize Weather')[0]?.json ?? {};\n\nconst clean = (value) => String(value ?? '').replace(/<[^>]*>/g, ' ').replace(/\\s+/g, ' ').trim();\nconst truncate = (value, limit = 420) => {\n  const text = clean(value);\n  return text.length > limit ? `${text.slice(0, limit - 1)}...` : text;\n};\n\nconst firstUsableItem = (nodeName) => {\n  const items = $items(nodeName) ?? [];\n  return items.find((item) => {\n    const json = item?.json ?? {};\n    return !json.error && (json.title || json.link || json.guid || json.description || json.contentSnippet);\n  })?.json ?? {};\n};\n\nconst normalizeRssItem = (item, fallbackTitle) => {\n  const title = clean(item.title) || fallbackTitle;\n  const link = clean(item.link) || clean(item.guid) || 'No link available';\n  const published = clean(item.isoDate) || clean(item.pubDate) || clean(item.date) || 'No publish date provided';\n  const summary = truncate(item.contentSnippet || item.description || item.content || item['content:encoded'] || 'No summary available');\n  return { title, link, published, summary };\n};\n\nconst tech = normalizeRssItem(firstUsableItem('Pick Top Tech Item'), 'Technology feed unavailable for this run');\nconst job = normalizeRssItem(firstUsableItem('Pick Top Job Item'), 'Career feed unavailable for this run');\n\nconst prompt = `Create a premium morning briefing for ${config.user_name}.\n\nAudience profile:\n${config.user_profile}\n\nLocation and weather:\n- City: ${config.city_name}\n- Current weather: ${weather.weather_summary || 'Weather data unavailable for this run.'}\n\nTechnology item:\n- Title: ${tech.title}\n- Link: ${tech.link}\n- Published: ${tech.published}\n- Summary: ${tech.summary}\n\nCareer opportunity:\n- Title: ${job.title}\n- Link: ${job.link}\n- Published: ${job.published}\n- Summary: ${job.summary}\n\nRequired output language:\n${config.output_language}\n\nRequired format:\nMorning Greeting\nWeather Insight\nTechnology Analysis\nCareer Analysis\nMatch Score: X/10\nDaily Strategy\nClosing\n\nQuality rules:\n- Stay under ${config.max_words} words.\n- Keep every URL unchanged and on its own line.\n- Do not invent facts beyond the supplied weather and RSS data.\n- If a feed is unavailable, say so briefly and continue with useful guidance.\n- Make the career score specific to the audience profile.\n- Avoid generic motivational cliches.\n- Use polished, direct, executive wording.\n- Return only the final notification text.`;\n\nreturn [{\n  json: {\n    prompt,\n    groq_model: config.groq_model,\n    ai_temperature: config.ai_temperature,\n    max_completion_tokens: config.max_completion_tokens,\n    ntfy_title: config.ntfy_title,\n    ntfy_priority: config.ntfy_priority,\n    ntfy_tags: config.ntfy_tags,\n    briefing_context: {\n      city: config.city_name,\n      weather: weather.weather_summary,\n      technology_title: tech.title,\n      technology_link: tech.link,\n      career_title: job.title,\n      career_link: job.link,\n    },\n  },\n}];"
+      },
+      "id": "build-ai-prompt",
+      "name": "Build AI Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1500,
+        -520
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{$node[\"Validate Config\"].json[\"groq_api_key\"]}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "JSON",
+        "body": "={{ JSON.stringify({ model: $json.groq_model, messages: [{ role: \"system\", content: \"You are an elite executive briefing editor. Return only the final notification text. Be concise, factual, and commercially polished.\" }, { role: \"user\", content: $json.prompt }], temperature: Number($json.ai_temperature || 0.6), max_completion_tokens: Number($json.max_completion_tokens || 700), top_p: 0.9, stream: false }) }}",
+        "options": {
+          "timeout": 45000
+        }
+      },
+      "id": "generate-briefing-groq",
+      "name": "Generate Briefing (Groq)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1740,
+        -520
+      ],
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 5000,
+      "continueOnFail": true,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $input.first()?.json ?? {};\nconst promptItem = $items('Build AI Prompt')[0]?.json ?? {};\n\nlet body = response.choices?.[0]?.message?.content;\nconst errorMessage = response.error?.message || response.message || response.error || response.statusText;\n\nif (!body || typeof body !== 'string') {\n  body = [\n    'AI Morning OS could not generate the briefing for this run.',\n    '',\n    `Reason: ${errorMessage || 'Groq returned an unexpected response.'}`,\n    '',\n    'Next step: check the Groq API key, model name, account limits, and the Generate Briefing (Groq) node output.',\n  ].join('\\n');\n}\n\nreturn [{\n  json: {\n    notification_body: body.trim(),\n    ntfy_title: promptItem.ntfy_title || 'AI Morning OS',\n    ntfy_priority: promptItem.ntfy_priority || 'default',\n    ntfy_tags: promptItem.ntfy_tags || 'sunrise,briefing,ai',\n  },\n}];"
+      },
+      "id": "format-notification",
+      "name": "Format Notification",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1980,
+        -520
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://ntfy.sh/{{$node[\"Validate Config\"].json[\"ntfy_topic\"]}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Title",
+              "value": "={{$json[\"ntfy_title\"]}}"
+            },
+            {
+              "name": "Priority",
+              "value": "={{$json[\"ntfy_priority\"]}}"
+            },
+            {
+              "name": "Tags",
+              "value": "={{$json[\"ntfy_tags\"]}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "text",
+        "body": "={{$json[\"notification_body\"]}}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "send-ntfy-notification",
+      "name": "Send ntfy Notification",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2220,
+        -520
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "USER CONFIG - EDIT ME",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "USER CONFIG - EDIT ME": {
+      "main": [
+        [
+          {
+            "node": "Validate Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Config": {
+      "main": [
+        [
+          {
+            "node": "Fetch Weather",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Weather": {
+      "main": [
+        [
+          {
+            "node": "Normalize Weather",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Weather": {
+      "main": [
+        [
+          {
+            "node": "Read Tech RSS",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Read Jobs RSS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Tech RSS": {
+      "main": [
+        [
+          {
+            "node": "Pick Top Tech Item",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pick Top Tech Item": {
+      "main": [
+        [
+          {
+            "node": "Merge Briefing Inputs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Jobs RSS": {
+      "main": [
+        [
+          {
+            "node": "Pick Top Job Item",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pick Top Job Item": {
+      "main": [
+        [
+          {
+            "node": "Merge Briefing Inputs",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge Briefing Inputs": {
+      "main": [
+        [
+          {
+            "node": "Build AI Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build AI Prompt": {
+      "main": [
+        [
+          {
+            "node": "Generate Briefing (Groq)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Briefing (Groq)": {
+      "main": [
+        [
+          {
+            "node": "Format Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Notification": {
+      "main": [
+        [
+          {
+            "node": "Send ntfy Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send ntfy Notification": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "active": false,
+  "tags": []
+}
