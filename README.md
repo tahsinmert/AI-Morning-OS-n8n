@@ -2,6 +2,10 @@
 
 AI Morning OS is a production-ready n8n automation template that sends a concise daily executive briefing through ntfy. It combines Open-Meteo weather data, technology RSS news, career RSS opportunities, and a Groq-hosted AI model into one polished morning notification.
 
+## Workflow Preview
+
+![AI Morning OS n8n workflow preview](docs/assets/workflow-preview.png)
+
 ## What This Automation Does
 
 - Runs automatically on a configurable morning schedule.
